@@ -4,7 +4,11 @@ import com.rjfun.cordova.ad.GenericAdPlugin;
 
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.util.Log;
 
+import com.mopub.common.MoPub;
+import com.mopub.common.SdkConfiguration;
+import com.mopub.common.SdkInitializationListener;
 import com.mopub.mobileads.MoPubErrorCode;
 import com.mopub.mobileads.MoPubInterstitial;
 import com.mopub.mobileads.MoPubInterstitial.InterstitialAdListener;
@@ -12,24 +16,35 @@ import com.mopub.mobileads.MoPubView;
 import com.mopub.mobileads.MoPubView.BannerAdListener;
 
 public class MoPubPlugin extends GenericAdPlugin {
-    private static final String LOGTAG = "MoPub";
-    
-    private static final String TEST_BANNER_ID 			= "47289d61e17f4a158efa5cc3bccdcb88";
-    private static final String TEST_INTERSTITIAL_ID 	= "aebb4fad0e2a4d10abb370eff7012632";
-    
-    private static final String TEST_BANNER_ID2 		= "agltb3B1Yi1pbmNyDAsSBFNpdGUY8fgRDA";
-    private static final String TEST_INTERSTITIAL_ID2	= "agltb3B1Yi1pbmNyDAsSBFNpdGUY6tERDA";
-    
-    private float screenDensity = 1.0f;
-    
-    @Override
-    protected void pluginInitialize() {
-    	super.pluginInitialize();
-    	
-    	DisplayMetrics metrics = new DisplayMetrics();
-        cordova.getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        screenDensity = metrics.density;
+  private static final String TAG = "MoPubPlugin";
+
+  private static final String TEST_BANNER_ID 			= "47289d61e17f4a158efa5cc3bccdcb88";
+  private static final String TEST_INTERSTITIAL_ID 	= "aebb4fad0e2a4d10abb370eff7012632";
+
+  private static final String TEST_BANNER_ID2 		= "agltb3B1Yi1pbmNyDAsSBFNpdGUY8fgRDA";
+  private static final String TEST_INTERSTITIAL_ID2	= "agltb3B1Yi1pbmNyDAsSBFNpdGUY6tERDA";
+
+  private float screenDensity = 1.0f;
+  private boolean initialized = false;
+
+  @Override
+  protected void pluginInitialize() {
+    super.pluginInitialize();
+
+    DisplayMetrics metrics = new DisplayMetrics();
+    cordova.getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+    screenDensity = metrics.density;
 	}
+
+  private SdkInitializationListener initSdkListener() {
+    return new SdkInitializationListener() {
+
+      @Override
+      public void onInitializationFinished() {
+        fireAdEvent("SDK initialized", "success");
+      }
+    };
+  }
 
 	@Override
 	protected String __getProductShortName() {
@@ -49,7 +64,15 @@ public class MoPubPlugin extends GenericAdPlugin {
 	@Override
 	protected View __createAdView(String adId) {
 		if(isTesting) adId = TEST_BANNER_ID2;
-		
+
+    if(!initialized) {
+      Log.e(TAG, "SDK initializing...");
+      initialized = true;
+      SdkConfiguration sdkConfiguration = new SdkConfiguration.Builder("b195f8dd8ded45fe847ad89ed1d016da").build();
+      MoPub.initializeSdk(getActivity(), sdkConfiguration, initSdkListener());
+      return null;
+    }
+
 		MoPubView ad = new MoPubView(getActivity());
         ad.setAdUnitId(adId);
         ad.setBannerAdListener(new BannerAdListener(){
@@ -81,7 +104,7 @@ public class MoPubPlugin extends GenericAdPlugin {
 	        	fireAdEvent(EVENT_AD_LOADED, ADTYPE_BANNER);
 			}
         });
-        
+
 		return ad;
 	}
 
