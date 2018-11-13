@@ -26,6 +26,7 @@ public class MoPubPlugin extends GenericAdPlugin {
 
   private float screenDensity = 1.0f;
   private boolean initialized = false;
+  private int mMoPubSlot = 0;
 
   @Override
   protected void pluginInitialize() {
@@ -37,6 +38,7 @@ public class MoPubPlugin extends GenericAdPlugin {
 	}
 
   private SdkInitializationListener initSdkListener() {
+    mMoPubSlot = (int) (System.currentTimeMillis() % 10);
     return new SdkInitializationListener() {
 
       @Override
@@ -73,7 +75,9 @@ public class MoPubPlugin extends GenericAdPlugin {
       return null;
     }
 
+    Log.d(TAG, "mMoPubSlot:" + mMoPubSlot);
 		MoPubView ad = new MoPubView(getActivity());
+        ad.setKeywords("m_slot:" + mMoPubSlot);
         ad.setAdUnitId(adId);
         ad.setBannerAdListener(new BannerAdListener(){
 			@Override
@@ -162,6 +166,7 @@ public class MoPubPlugin extends GenericAdPlugin {
 	protected Object __createInterstitial(String adId) {
 		if(isTesting) adId = TEST_INTERSTITIAL_ID2;
 		MoPubInterstitial ad = new MoPubInterstitial(getActivity(), adId);
+        ad.setKeywords("m_slot:" + mMoPubSlot);
         ad.setInterstitialAdListener(new InterstitialAdListener(){
 
 			@Override
