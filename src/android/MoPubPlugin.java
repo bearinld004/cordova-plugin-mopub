@@ -78,6 +78,7 @@ public class MoPubPlugin extends GenericAdPlugin {
     Log.d(TAG, "mMoPubSlot:" + mMoPubSlot);
 		MoPubView ad = new MoPubView(getActivity());
         ad.setKeywords("m_slot:" + mMoPubSlot);
+        ad.setBackgroundColor(0xFFFFFFFF);
         ad.setAdUnitId(adId);
         ad.setBannerAdListener(new BannerAdListener(){
 			@Override
