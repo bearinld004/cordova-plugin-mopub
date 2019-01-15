@@ -4,7 +4,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="cordova-plugin-mopub"
   version="2.4.1">
-      
+
   <name>MoPub</name>
   <description>Cordova/PhoneGap Plugin for MoPub Ads</description>
   <author>Liming Xie</author>
@@ -59,7 +59,7 @@
       <framework src="com.android.support:recyclerview-v7:+" />
 
   </platform>
-     
+
   <!-- ios -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
@@ -88,7 +88,7 @@
     <framework src="WebKit.framework"/>
 
     <!-- required cordova 6.4.0 or higher -->
-    <framework src="mopub-ios-sdk" type="podspec" spec="~> 4.12.0"/>
+    <framework src="mopub-ios-sdk" type="podspec" spec="~> 5.4.1"/>
 
   </platform>
 
