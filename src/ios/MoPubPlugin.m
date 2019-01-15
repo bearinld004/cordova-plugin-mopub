@@ -23,6 +23,7 @@
 @property (assign) BOOL locationEnabled;
 @property (nonatomic, retain) CLLocationManager *locationManager;
 @property (nonatomic, retain) CLLocation *lastKnownLocation;
+@property (assign) int slot;
 
 - (CGSize)__AdSizeFromString:(NSString *)str;
 - (void)__enableLocationSupport:(BOOL)shouldEnable;
@@ -54,9 +55,9 @@
 {
     if( self.locationEnabled == shouldEnable )
         return;
-    
+
     self.locationEnabled = shouldEnable;
-    
+
     // are we stopping or starting location use?
     if( self.locationEnabled )
     {
@@ -65,7 +66,7 @@
         self.locationManager.delegate = self;
         self.locationManager.distanceFilter = 100;
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-        
+
         // Make sure the user has location on in settings
         if( self.locationManager.locationServicesEnabled ) {
             // Only start updating if we can get location information
@@ -87,12 +88,13 @@
 - (void)pluginInitialize
 {
     [super pluginInitialize];
+    self.slot = arc4random_uniform(10);
 }
 
 - (void) parseOptions:(NSDictionary *)options
 {
     [super parseOptions:options];
-    
+
     NSString* str = [options objectForKey:OPT_AD_SIZE];
     if(str) self.adSize = [self __AdSizeFromString:str];
 }
@@ -115,13 +117,15 @@
 - (UIView*) __createAdView:(NSString*)adId;
 {
     if(self.isTesting) adId = TEST_BANNER_ID;
-    
+
     MPAdView* ad = [[MPAdView alloc] initWithAdUnitId:adId size:self.adSize];
     if(self.locationEnabled && self.lastKnownLocation) {
         ad.location = self.lastKnownLocation;
     }
     ad.delegate = self;
-    
+    ad.keywords = [NSString stringWithFormat:@"m_slot:%d", self.slot];
+    NSLog(@"MoPub banner keywords: %@",ad.keywords);
+
     return ad;
 }
 
@@ -178,13 +182,15 @@
 - (NSObject*) __createInterstitial:(NSString*)adId
 {
     if(self.isTesting) adId = TEST_INTERSTITIAL_ID;
-    
+
     MPInterstitialAdController* ad = [MPInterstitialAdController interstitialAdControllerForAdUnitId:adId];
     if(self.locationEnabled && self.lastKnownLocation) {
         ad.location = self.lastKnownLocation;
     }
     ad.delegate = self;
-    
+    ad.keywords = [NSString stringWithFormat:@"m_slot:%d", self.slot];
+    NSLog(@"MoPub interstitial keywords: %@",ad.keywords);
+
     return ad;
 }
 
@@ -220,14 +226,14 @@
            fromLocation:(CLLocation*)oldLocation
 {
     self.lastKnownLocation = newLocation;
-    
+
     // update our locations
-    
+
     if(self.banner) {
         MPAdView* ad = (MPAdView*) self.banner;
         ad.location = newLocation;
     }
-    
+
     if(self.interstitial) {
         MPInterstitialAdController* ad = (MPInterstitialAdController*) self.interstitial;
         ad.location = newLocation;
@@ -239,7 +245,7 @@
 - (void)adViewDidLoadAd:(MPAdView*)view
 {
     [self fireAdEvent:EVENT_AD_LOADED withType:ADTYPE_BANNER];
-    
+
     if((! self.bannerVisible) && self.autoShowBanner) {
         [self __showBanner:self.adPosition atX:self.posX atY:self.posY];
     }
@@ -275,7 +281,7 @@
 - (void)interstitialDidLoadAd:(MPInterstitialAdController*)interstitial
 {
     [self fireAdEvent:EVENT_AD_LOADED withType:ADTYPE_INTERSTITIAL];
-    
+
     if(self.autoShowInterstitial) {
         [self __showInterstitial:self.interstitial];
     }
