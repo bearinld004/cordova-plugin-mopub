@@ -86,9 +86,15 @@
     <framework src="SystemConfiguration.framework"/>
     <framework src="UIKit.framework"/>
     <framework src="WebKit.framework"/>
-
-    <!-- required cordova 6.4.0 or higher -->
-    <framework src="mopub-ios-sdk" type="podspec" spec="~> 5.17.0"/>
+    
+    <podspec>
+         <config>
+             <source url="https://github.com/CocoaPods/Specs.git"/>
+         </config>
+         <pods use-frameworks="true">
+             <pod name="mopub-ios-sdk" spec="~> 5.17.0" />
+         </pods>
+    </podspec>
 
   </platform>
 
